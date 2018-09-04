@@ -5,6 +5,7 @@
  * This is an open source and simplified implementation of Daraja API and Africa's Talking SMS APIs
  *
  * @author Kanyi K <kanyikennedy@gmail.com>
+ * @author Vincent Muchiri <vgichira39@gmail.com>
  * @license http://www.opensource.org/licenses/MIT
  * 
  */
@@ -13,8 +14,46 @@ require_once('../config/config.php');
 
 # Send SMS on AT
 
-function sendMessage($to,$message,$from)
+function sendMessage($to, $message)
 {
+    require_once("../config/AfricasTalkingGateway.php");
+
+    global $africastalking;
+
+    if ($africastalking['ENVIRONMENT'] == "SANDBOX") {
+        $username   = $africastalking['SANDBOX']['APP_USERNAME'];
+        $apikey     = $africastalking['SANDBOX']['APP_API_KEY'];
+        $senderid   = $africastalking['SANDBOX']['SENDER_ID'];
+        $gateway    = new AfricasTalkingGateway($username, $apikey, "sandbox");
+    }
+
+    elseif ($africastalking['ENVIRONMENT'] == "LIVE") {
+        $username   = $africastalking['LIVE']['APP_USERNAME'];
+        $apikey     = $africastalking['LIVE']['APP_API_KEY'];
+        $senderid   = $africastalking['LIVE']['SENDER_ID'];
+        $gateway    = new AfricasTalkingGateway($username, $apikey);
+    }
+
+    else{
+        die("The enviroment can either be SANDBOX OR LIVE");
+    }
+    
+    try 
+    {
+      $results = $gateway->sendMessage($to, $message, $senderid);
+                
+      foreach($results as $result) {
+        echo " Number: " .$result->number;
+        echo " Status: " .$result->status;
+        echo " StatusCode: " .$result->statusCode;
+        echo " MessageId: " .$result->messageId;
+        echo " Cost: "   .$result->cost."\n";
+      }
+    }
+    catch ( AfricasTalkingGatewayException $e )
+    {
+      echo "Encountered an error while sending: ".$e->getMessage();
+    }
 
 }
 

@@ -5,6 +5,7 @@
  * This is an open source and simplified implementation of Daraja API and Africa's Talking SMS APIs
  *
  * @author Kanyi K <kanyikennedy@gmail.com>
+ * @author Vincent Muchiri <vgichira39@gmail.com>
  * @license http://www.opensource.org/licenses/MIT
  * 
  */
@@ -115,8 +116,19 @@ $daraja = array(
 $africastalking = array(
     # This is the API to handle SMS confirmation for payments to and from the Daraja API
     # Website www.africastalking.com
-    # 
-    'APP_USERNAME'                          => '', # Africa's Talking Username
-    'APP_API_KEY'                           => '', # Africa's Talking API Key
-    'SENDER_ID'                             => ''  # Africa's Talking Sender ID, Default is Africa's Talking
+    #
+
+    "ENVIRONMENT" => "SANDBOX", # Can either be LIVE OR SANDBOX. Default is SANDBOX
+
+    "SANDBOX"=>array(
+        'APP_USERNAME'                          => 'sandbox', # Africa's Talking Sandbox Username.
+        'APP_API_KEY'                           => 'ad8f74a9eef2490fe5b2c52e6eaf47707b43af36dc141b2474d40aa3177b946e', # Africa's Talking Sandbox API Key
+        'SENDER_ID'                             =>  NULL,  # Africa's Talking Sender ID, Default is Africa's Talking
+    ),
+
+    "LIVE"=>array(
+        'APP_USERNAME'                          => 'AFRICASTALKING_USERNAME', # Africa's Talking Username
+        'APP_API_KEY'                           => 'AFRICASTALKING_API_KEY', # Africa's Talking API Key
+        'SENDER_ID'                             => 'CUSTOM_SENDER ID',  # Africa's Talking Sender ID, Default is Africa's Talking
+    )
 );
