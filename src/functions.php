@@ -130,7 +130,11 @@ function initiateB2C($PHONE_NUMBER, $AMOUNT, $COMMAND_ID, $DESCRIPTION)
         $CONFIRMATION_URL          = $daraja['RESPONSE_CALLBACKS']['B2C_RESULT_URL'];
         $VALIDATION_URL            = $daraja['RESPONSE_CALLBACKS']['B2C_QUEUE_TIMEOUT_URL'];
     }else{
-        
+        $B2C_URL                   = $daraja['LIVE_CONFIG']['POST_URLS']['B2C'];
+        $SHORTCODE                 = $daraja['LIVE_CONFIG']['SHORT_CODE'];
+        $INITIATOR_NAME            = $daraja['LIVE_CONFIG']['INITIATOR_NAME'];
+        $CONFIRMATION_URL          = $daraja['RESPONSE_CALLBACKS']['B2C_RESULT_URL'];
+        $VALIDATION_URL            = $daraja['RESPONSE_CALLBACKS']['B2C_QUEUE_TIMEOUT_URL'];
     }
 
     $curl = curl_init();
@@ -140,16 +144,16 @@ function initiateB2C($PHONE_NUMBER, $AMOUNT, $COMMAND_ID, $DESCRIPTION)
 
     $curl_post_data = array(
     //Fill in the request parameters with valid values
-    'InitiatorName' => $INITIATOR_NAME,
-    'SecurityCredential' => generateSecurityCredentials(),
-    'CommandID' => $COMMAND_ID,
-    'Amount' => $AMOUNT,
-    'PartyA' => $SHORTCODE,
-    'PartyB' => $PHONE_NUMBER,
-    'Remarks' => $DESCRIPTION,
-    'QueueTimeOutURL' => $CONFIRMATION_URL,
-    'ResultURL' => $VALIDATION_URL,
-    'Occasion' => ''
+    'InitiatorName'          => $INITIATOR_NAME,
+    'SecurityCredential'     => generateSecurityCredentials(),
+    'CommandID'              => $COMMAND_ID,
+    'Amount'                 => $AMOUNT,
+    'PartyA'                 => $SHORTCODE,
+    'PartyB'                 => $PHONE_NUMBER,
+    'Remarks'                => $DESCRIPTION,
+    'QueueTimeOutURL'        => $CONFIRMATION_URL,
+    'ResultURL'              => $VALIDATION_URL,
+    'Occasion'               => ''
     );
 
     $data_string = json_encode($curl_post_data);
@@ -161,4 +165,49 @@ function initiateB2C($PHONE_NUMBER, $AMOUNT, $COMMAND_ID, $DESCRIPTION)
     $curl_response = curl_exec($curl);
     return $curl_response;
 
+}
+
+function initiateB2B($COMMAND_ID, $SENDER_IDENTIFIER, $RECEIVER_IDENTIFIER, $AMOUNT, $TO_PAYBILL, $ACCOUNT_NO, $REMARKS)
+{
+    global $daraja;
+
+    if ($daraja['ENVIRONMENT'] == "SANDBOX") 
+    {
+        $B2B_ENDPOINT   = $daraja['SANDBOX_CONFIG']['POST_URLS']['B2B'];
+        $INITIATOR_NAME = $daraja['SANDBOX_CONFIG']['INITIATOR_NAME'];
+    }
+    else{
+        $B2B_ENDPOINT   = $daraja['LIVE_CONFIG']['POST_URLS']['B2B'];
+        $INITIATOR_NAME = $daraja['LIVE_CONFIG']['INITIATOR_NAME'];
+    }
+
+    $curl = curl_init();
+
+    curl_setopt($curl, CURLOPT_URL, $B2B_ENDPOINT);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Authorization: Bearer '.generateToken()));
+
+    $request_data = array(
+        "Initiator"               => $INITIATOR_NAME,
+        "SecurityCredential"      => generateSecurityCredentials(),
+        "CommandID"               => $COMMAND_ID,
+        "SenderIdentifierType"    => $SENDER_IDENTIFIER,
+        "RecieverIdentifierType"  => $RECEIVER_IDENTIFIER,
+        "Amount"                  => $AMOUNT,
+        "PartyA"                  => $daraja['LIVE_CONFIG']['SHORT_CODE'],
+        "PartyB"                  => $TO_PAYBILL,
+        "AccountReference"        => $ACCOUNT_NO,
+        "Remarks"                 => $REMARKS,
+        "QueueTimeOutURL"         => $daraja['RESPONSE_CALLBACKS']['B2B_QUEUE_TIMEOUT_URL'],
+        "ResultURL"               => $daraja['RESPONSE_CALLBACKS']['B2B_RESULT_URL']
+    );
+
+    $json_data = json_encode($request_data);
+
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $json_data);
+
+    $response = curl_exec($curl);
+
+    print_r($response);
 }
